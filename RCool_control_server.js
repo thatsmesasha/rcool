@@ -1,6 +1,7 @@
 const fs = require('fs')
 const base64 = require('base64-js')
 const WebSocket = require('ws')
+const spawn = require('child_process').spawn
 
 const DRIVE_CMD = `/usr/bin/python3 ${__dirname}/RCool_drive.py`
 
