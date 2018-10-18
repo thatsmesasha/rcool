@@ -20,6 +20,10 @@ function createCameraServer() {
 
   const wss = new WebSocket.Server({ port: 4201 })
 
+  wss.on('open', () => {
+    console.log('Camera Server: Waiting for connections...')
+  })
+
   wss.on('connection', (ws, req) => {
     console.log(`Camera Server: Client ${req.connection.remoteAddress}: Connected`)
 
@@ -38,8 +42,6 @@ function createCameraServer() {
       raspi.stdout.removeListener('data', currentData)
     })
   })
-
-  console.log('Camera Server: Waiting for connections...')
 }
 
 function run() {

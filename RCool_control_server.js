@@ -68,6 +68,10 @@ function createCameraClient() {
 function createControlServer() {
   const wss = new WebSocket.Server({ port: 4202 });
 
+  wss.on('open', () => {
+    console.log('Control Server: Waiting for connections...')
+  })
+
   wss.on('connection', (ws, req) => {
     console.log(`Control Server: Client ${req.connection.remoteAddress}: Connected`)
 
@@ -99,8 +103,6 @@ function createControlServer() {
       // TODO turn off ml mode
     })
   })
-
-  console.log('Control Server: Waiting for connections...')
 }
 
 function run() {
