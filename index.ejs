@@ -196,9 +196,14 @@
     </div>
   </body>
 
+  <!-- URL -->
+  <script type='text/javascript'>
+    const url = '<%= url %>'
+  </script>
+
   <!-- WEBSOCKET CAMERA -->
   <script type='text/javascript'>
-    const wsCamera = new WebSocket(`ws://${<% url %>}:4201`)
+    const wsCamera = new WebSocket(`ws://${url}:4201`)
     wsCamera.onmessage = (base64image) => {
       document.getElementById('camera').src = 'data:image/png;base64,' + base64image.data
     }
@@ -206,7 +211,7 @@
 
   <!-- WEBSOCKET CONTROL -->
   <script type='text/javascript'>
-    const wsControl = new WebSocket(`ws://${<% url %>}:4202`)
+    const wsControl = new WebSocket(`ws://${url}:4202`)
 
     const changeStatus = (message) => document.getElementById('status').innerHTML = message
 

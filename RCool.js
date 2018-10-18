@@ -4,7 +4,12 @@ const controlServer = require('./RCool_control_server')
 const os = require('os')
 
 try {
-  const url = os.networkInterfaces().wlan0[0].address
+  let url = null
+  try {
+    url = os.networkInterfaces().wlan0[0].address
+  } catch (err) {
+    throw Error('Cannot get wlan0 network address')
+  }
 
   cameraServer.run()
   controlServer.run()
