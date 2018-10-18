@@ -16,11 +16,11 @@ def drive(direction):
   elif direction == 'right':
     print('driving right')
     speed.value = 0.2
-    steering.max()
+    steering.min()
   elif direction == 'left':
     print('driving left')
     speed.value = 0.2
-    steering.min()
+    steering.max()
   elif direction == 'back':
     print('driving back')
     speed.value = -0.3
