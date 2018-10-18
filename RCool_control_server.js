@@ -2,6 +2,8 @@ const fs = require('fs')
 const base64 = require('base64-js')
 const WebSocket = require('ws')
 
+const DRIVE_CMD = `${__dirname}/RCool_drive.py`
+
 function createFolders(ws, folderName) {
   const fullPath = `${__dirname}/${folderName}`
   if (!fs.existsSync(fullPath)) {
@@ -38,7 +40,7 @@ function saveImage(ws, direction, folderName) {
   }
 }
 
-// CAMERA SERVER CONNECTION
+// CAMERA CLIENT CONNECTION
 let lastImage = null
 
 function createCameraClient() {
@@ -57,15 +59,19 @@ function createCameraClient() {
   })
 }
 
-// DRIVE SERVER CONNECTION
-// TODO
+// DRIVE CLIENT CONNECTION
+function createDriveClient() {
+  const drive = spawn(DRIVE_CMD)
+  drive.stdin.setEncoding('utf-8')
+  return drive.stdin
+}
 
-// ML SERVER CONNECTION
+// ML CLIENT CONNECTION
 // TODO
 
 // CONTROL SERVER
 
-function createControlServer() {
+function createControlServer(drive) {
   const wss = new WebSocket.Server({ port: 4202 });
 
   wss.on('listening', () => {
@@ -86,11 +92,11 @@ function createControlServer() {
       }
       if (typeof data.folderName == 'string' && typeof data.direction == 'string') {
         saveImage(ws, data.direction, data.folderName)
-        // TODO send direction to drive wss
+        drive.write(data.direction + '\n')
       } else if (typeof data.folderName == 'string') {
         createFolders(ws, data.folderName)
       } else if (typeof data.direction == 'string') {
-        // TODO send direction to drive wss
+        drive.write(data.direction + '\n')
       } else if (typeof data.auto == 'boolean') {
         // TODO turn on/off ml wss
       } else {
@@ -107,9 +113,9 @@ function createControlServer() {
 
 function run() {
   createCameraClient()
-  // TODO create drive client
+  const drive = createDriveClient()
   // TODO create ml client
-  createControlServer()
+  createControlServer(drive)
 }
 
 module.exports = {
