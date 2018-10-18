@@ -20,7 +20,7 @@ function createCameraServer() {
 
   const wss = new WebSocket.Server({ port: 4201 })
 
-  wss.on('open', () => {
+  wss.on('listening', () => {
     console.log('Camera Server: Waiting for connections...')
   })
 
