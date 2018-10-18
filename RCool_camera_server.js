@@ -15,6 +15,9 @@ const RASPI_ARGS = [
 function createCameraServer() {
   const raspi = spawn(RASPI_CMD, RASPI_ARGS)
   raspi.stdin.setEncoding('utf-8')
+  raspi.on('error', (err) => {
+    console.error(`Camera Server: Error: ${err}`)
+  })
 
   setInterval(() => raspi.stdin.write('\n'), 50)
 

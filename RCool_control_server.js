@@ -3,7 +3,8 @@ const base64 = require('base64-js')
 const WebSocket = require('ws')
 const spawn = require('child_process').spawn
 
-const DRIVE_CMD = `/usr/bin/python3 ${__dirname}/RCool_drive.py`
+const DRIVE_CMD = 'python3'
+const DRIVE_ARGS = [`${__dirname}/RCool_drive.py`]
 
 function createFolders(ws, folderName) {
   const fullPath = `${__dirname}/${folderName}`
@@ -62,8 +63,14 @@ function createCameraClient() {
 
 // DRIVE CLIENT CONNECTION
 function createDriveClient() {
-  const drive = spawn(DRIVE_CMD)
+  const drive = spawn(DRIVE_CMD, DRIVE_ARGS)
   drive.stdin.setEncoding('utf-8')
+  drive.stdout.on('data', (data) => {
+    console.log(`Drive Server: ${data}`)
+  })
+  drive.on('error', (err) => {
+    console.error(`Drive Server: Error: ${err}`)
+  })
   return drive.stdin
 }
 
