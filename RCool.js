@@ -18,5 +18,5 @@ try {
   app.listen(port, () => console.log(`RCool Server: Running on port ${port}`))
 
 } catch (err) {
-  console.err(`RCool Server: Error: ${err}`)
+  console.error(`RCool Server: Error: ${err}`)
 }
