@@ -11,7 +11,7 @@ speed = Servo(PIN_B)
 def drive(direction):
   if direction == 'forward':
     print('driving forward')
-    speed.value = 0.3
+    speed.value = 0.2
     steering.mid()
   elif direction == 'right':
     print('driving right')
