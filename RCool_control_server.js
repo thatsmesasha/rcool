@@ -2,7 +2,7 @@ const fs = require('fs')
 const base64 = require('base64-js')
 const WebSocket = require('ws')
 
-const DRIVE_CMD = `${__dirname}/RCool_drive.py`
+const DRIVE_CMD = `/usr/bin/python3 ${__dirname}/RCool_drive.py`
 
 function createFolders(ws, folderName) {
   const fullPath = `${__dirname}/${folderName}`
