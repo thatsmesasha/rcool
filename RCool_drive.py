@@ -16,7 +16,7 @@ def drive_right():
   speed.value = 0.2
   steering.min()
 
-def drive_back():
+def drive_left():
   speed.value = 0.2
   steering.max()
 
