@@ -65,10 +65,7 @@ function createCameraClient() {
 function createDriveClient() {
   const drive = spawn(DRIVE_CMD, DRIVE_ARGS)
   drive.stdin.setEncoding('utf-8')
-  drive.stdout.on('data', (data) => {
-    console.log(`Drive Server: ${data}`)
-  })
-  drive.on('error', (err) => {
+  drive.stderr.on('data', (err) => {
     console.error(`Drive Server: Error: ${err}`)
   })
   return drive.stdin
