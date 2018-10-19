@@ -1,7 +1,7 @@
 const spawn = require('child_process').spawn
 const WebSocket = require('ws')
 const base64 = require('base64-js')
-
+const fs = require('fs')
 
 const RASPI_CMD = '/opt/vc/bin/raspistill'
 const RASPI_ARGS = [
@@ -17,6 +17,14 @@ function createCameraServer() {
   raspi.stdin.setEncoding('utf-8')
   raspi.on('error', (err) => {
     console.error(`Camera Server: Error: ${err}`)
+  })
+
+  raspi.stdout.on('data', (data) => {
+    fs.writeFile('current.png', data, 'binary', (err) => {
+      if (err) {
+        console.error(`Camera Server: Error: ${err}`)
+      }
+    })
   })
 
   setInterval(() => raspi.stdin.write('\n'), 50)
