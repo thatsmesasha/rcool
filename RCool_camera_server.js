@@ -5,8 +5,8 @@ const fs = require('fs')
 
 const RASPI_CMD = '/opt/vc/bin/raspistill'
 const RASPI_ARGS = [
-  '-w', '160',
-  '-h', '160',
+  '-w', '96',
+  '-h', '96',
   '-k', // receive new image when pressing enter
   '-t', '999999999', // max time recording
   '-o', '-', // output to stdout
@@ -20,7 +20,7 @@ function createCameraServer() {
   })
 
   raspi.stdout.on('data', (data) => {
-    fs.writeFile('current.png', data, 'binary', (err) => {
+    fs.writeFile('current.png', base64.fromByteArray(data), 'base64', (err) => {
       if (err) {
         console.error(`Camera Server: Error: ${err}`)
       }

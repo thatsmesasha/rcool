@@ -255,7 +255,7 @@
             case 'auto-mode':
               document.getElementById('folder-panel').style.visibility = 'hidden'
               document.getElementById('start-stop-panel').style.visibility = 'visible'
-              // TODO add auto onclick event
+              changeAutoMode(false)
               break
             default:
               break
@@ -277,6 +277,7 @@
   <!-- START/STOP -->
   <script type='text/javascript'>
     var recordImages = false
+    var autoStarted = false
     var folderName = null
 
     function changeTrainMode(on) {
@@ -292,9 +293,11 @@
           }
           buttonStartStop.innerHTML = 'Stop'
           wsControl.send(JSON.stringify({ folderName }))
+          buttonStartStop.onclick = () => changeTrainMode(false)
         } else {
           folderName = null
           buttonStartStop.innerHTML = 'Start'
+          buttonStartStop.onclick = () => changeTrainMode(true)
         }
         recordImages = on
         changeOnclickMode(!on)
@@ -304,7 +307,24 @@
     }
 
 
-    // TODO changeAutoMode
+    function changeAutoMode(on) {
+      if (currentMode == 'auto-mode') {
+        changeStatus('')
+        var buttonStartStop = document.getElementById('start-stop-button')
+        if (autoStarted != on) {
+          wsControl.send(JSON.stringify({ auto: on }))
+        }
+        autoStarted = on
+        if (on) {
+          buttonStartStop.innerHTML = 'Stop'
+          buttonStartStop.onclick = () => changeAutoMode(false)
+        } else {
+          buttonStartStop.innerHTML = 'Start'
+          buttonStartStop.onclick = () => changeAutoMode(true)
+        }
+        changeOnclickMode(!on)
+      }
+    }
   </script>
 
   <!-- KEYS -->

@@ -6,6 +6,11 @@ const spawn = require('child_process').spawn
 const DRIVE_CMD = 'python3'
 const DRIVE_ARGS = [`${__dirname}/RCool_drive.py`]
 
+const ML_CMD = 'python3'
+const ML_ARGS = [`${__dirname}/RCool_ml.py`]
+const ML_OPTIONS = { env: Object.create(process.env) }
+ML_OPTIONS.env.VISION_BONNET_MODELS_PATH = __dirname
+
 function createFolders(ws, folderName) {
   const fullPath = `${__dirname}/${folderName}`
   if (!fs.existsSync(fullPath)) {
@@ -72,11 +77,22 @@ function createDriveClient() {
 }
 
 // ML CLIENT CONNECTION
-// TODO
+let runningMl = false
+
+function createMlClient() {
+  const ml = spawn(ML_CMD, ML_ARGS, ML_OPTIONS)
+  ml.stdin.setEncoding('utf-8')
+  ml.stderr.on('data', (err) => {
+    console.error(`Ml Server: Error: ${err}`)
+  })
+  setTimeout(() => setInterval(() => runningMl ? ml.stdin.write('\n') : null, 1000), 10000)
+  return ml.stdout
+}
+
 
 // CONTROL SERVER
 
-function createControlServer(drive) {
+function createControlServer(drive, ml) {
   const wss = new WebSocket.Server({ port: 4202 });
 
   wss.on('listening', () => {
@@ -87,6 +103,32 @@ function createControlServer(drive) {
     console.log(`Control Server: Client ${req.connection.remoteAddress}: Connected`)
 
     let folderName = null
+    const streamMlData = (data) => {
+      data = String.fromCharCode.apply(null, data)
+      if (!data.startsWith('prediction:')) return
+
+      let [_, timestamp, direction, probability] = data.trim().split(' ')
+      timestamp = float(timestamp)
+      // max delay should be less then 0.5 seconds, otherwise discard it
+      const delay = (new Date).getTime() / 1000 - timestamp
+      if (delay <= 0.5 ) {
+        console.log(`Ml Server: Predicted direction '${direction}' with probability ${probability} in ${delay}s`)
+        try {
+          ws.send(JSON.stringify({ direction, probability }))
+        } catch (err) {
+
+        }
+      } else {
+        console.warn(`Ml Server: Warning: Delay is ${delay}s, discarding prediction`)
+        try {
+          ws.send(JSON.stringify({ warning: 'Ml took too long to predict' }))
+        } catch (err) {
+
+        }
+      }
+    }
+
+    ml.on('data', streamMlData)
 
     ws.on('message', (data) => {
       console.log(`Control Server: Client ${req.connection.remoteAddress}: ${data}`)
@@ -103,7 +145,7 @@ function createControlServer(drive) {
       } else if (typeof data.direction == 'string') {
         drive.write(data.direction + '\n')
       } else if (typeof data.auto == 'boolean') {
-        // TODO turn on/off ml wss
+        runningMl = data.auto
       } else {
         console.error(`Control Server: Client ${req.connection.remoteAddress}: Error: no command corresponds to the received message`)
       }
@@ -111,7 +153,8 @@ function createControlServer(drive) {
 
     ws.on('close', () => {
       console.log(`Control Server: Client ${req.connection.remoteAddress}: Disconnected`)
-      // TODO turn off ml mode
+      runningMl = false
+      ml.removeListener('data', streamMlData)
     })
   })
 }
@@ -119,8 +162,8 @@ function createControlServer(drive) {
 function run() {
   createCameraClient()
   const drive = createDriveClient()
-  // TODO create ml client
-  createControlServer(drive)
+  const ml = createMlClient()
+  createControlServer(drive, ml)
 }
 
 module.exports = {
