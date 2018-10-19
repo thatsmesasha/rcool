@@ -6,7 +6,7 @@ const base64 = require('base64-js')
 const RASPI_CMD = '/opt/vc/bin/raspistill'
 const RASPI_ARGS = [
   '-w', '160',
-  '-h', '96',
+  '-h', '160',
   '-k', // receive new image when pressing enter
   '-t', '999999999', // max time recording
   '-o', '-', // output to stdout
