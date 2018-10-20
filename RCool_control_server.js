@@ -126,7 +126,7 @@ function createControlServer(drive, ml) {
       drive.write(direction + '\n')
 
       if (folderNameAuto) {
-        saveImage(ws, direction, folderNameAuto, direction != 'back')        
+        saveImage(ws, direction, folderNameAuto, direction != 'back')
       }
 
       try {
@@ -153,19 +153,17 @@ function createControlServer(drive, ml) {
           saveImage(ws, data.direction, data.folderName, data.direction != 'back')
         }
         drive.write(data.direction + '\n')
-      } else if (typeof data.folderName == 'string') {
-        createFolders(ws, data.folderName)
-      } else if (typeof data.direction == 'string') {
-        drive.write(data.direction + '\n')
-      }
-
-      if (typeof data.auto == 'boolean') {
+      } else if (typeof data.auto == 'boolean') {
         runningMl = data.auto
         if (typeof data.folderName == 'string') {
           folderNameAuto = data.folderName
         } else {
           folderNameAuto = null
         }
+      } else if (typeof data.folderName == 'string') {
+        createFolders(ws, data.folderName)
+      } else if (typeof data.direction == 'string') {
+        drive.write(data.direction + '\n')
       } else {
         console.error(`Control Server: Client ${req.connection.remoteAddress}: Error: no command corresponds to the received message`)
       }
