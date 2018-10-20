@@ -8,9 +8,9 @@ from threading import Timer
 steering = Servo(PIN_A)
 speed = Servo(PIN_B)
 
-DRIVE_FORWARD_SPEED = 0.05
-DRIVE_BACK_SPEED = -0.05
-STEERING_STRAIGHT = 0
+DRIVE_FORWARD_SPEED = 0.2
+DRIVE_BACK_SPEED = -0.3
+STEERING_STRAIGHT = -0.17
 
 def drive_forward():
     speed.value = DRIVE_FORWARD_SPEED
@@ -57,7 +57,7 @@ def drive(direction):
     if timer:
         timer.cancel()
     _drive(direction)
-    timer = Timer(1, stop)
+    timer = Timer(0.5, stop)
     timer.start()
 
 if __name__ == '__main__':
