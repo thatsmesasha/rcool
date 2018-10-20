@@ -29,7 +29,6 @@ def drive_back():
     steering.value = STEERING_STRAIGHT
 
 def stop():
-  print('stopping')
     speed.value = 0
     steering.value = STEERING_STRAIGHT
 
@@ -44,10 +43,13 @@ def _drive(direction):
         print('driving left')
         drive_left()
     elif direction == 'back':
+        print('driving back')
         drive_back()
         Timer(0.05, stop).start()
-        print('driving back')
         Timer(0.1, drive_back).start()
+    elif direction == 'stop':
+        print('stopping')
+        stop()
 
 timer = None
 
@@ -57,11 +59,12 @@ def drive(direction):
     if timer:
         timer.cancel()
     _drive(direction)
-    timer = Timer(0.5, stop)
+    timer = Timer(0.5, lambda: _drive('stop'))
     timer.start()
 
 if __name__ == '__main__':
     print('Waiting for input...')
+    sys.stdout.flush()
     for direction in sys.stdin:
         direction = direction.replace('\n', '')
         drive(direction)

@@ -253,7 +253,7 @@
               changeTrainMode(false)
               break
             case 'auto-mode':
-              document.getElementById('folder-panel').style.visibility = 'hidden'
+              document.getElementById('folder-panel').style.visibility = 'visible'
               document.getElementById('start-stop-panel').style.visibility = 'visible'
               changeAutoMode(false)
               break
@@ -302,7 +302,6 @@
         recordImages = on
         changeOnclickMode(!on)
         folderInput.readOnly = on
-        buttonStartStop.onclick = ((nextOn) => (() => changeTrainMode(nextOn)))(!on)
       }
     }
 
@@ -311,18 +310,30 @@
       if (currentMode == 'auto-mode') {
         changeStatus('')
         var buttonStartStop = document.getElementById('start-stop-button')
+        var folderInput = document.getElementById('folder')
         if (autoStarted != on) {
           wsControl.send(JSON.stringify({ auto: on }))
         }
         autoStarted = on
         if (on) {
+          folderName = folderInput.value
+          if (folderName) {
+            wsControl.send(JSON.stringify({ folderName }))
+            recordImages = true
+            changeStatus('Running self-driving mode with saving images')
+          } else {
+            changeStatus('Running self-driving mode without saving images')
+          }
           buttonStartStop.innerHTML = 'Stop'
           buttonStartStop.onclick = () => changeAutoMode(false)
         } else {
+          folderName = null
+          recordImages = false
           buttonStartStop.innerHTML = 'Start'
           buttonStartStop.onclick = () => changeAutoMode(true)
         }
         changeOnclickMode(!on)
+        folderInput.readOnly = on
       }
     }
   </script>
@@ -336,6 +347,9 @@
         wsControl.send(JSON.stringify({ direction, folderName }))
       } else {
         wsControl.send(JSON.stringify({ direction }))
+      }
+      if (autoStarted) {
+        changeAutoMode(false)
       }
     } else {
       changeStatus('Cannot connect to control websocket. Make sure it is running and refresh the page.')

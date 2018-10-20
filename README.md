@@ -31,9 +31,11 @@ To start the server run:
 npm start
 ```
 
-It will output url to access the website, or just go to http://YOUR-GOOGLE-VISION-KIT-IP:4200
+The RCool server consists of 4 parts: camera, control, drive and ml. You will see output messages when each of them boots. Wait until all 4 of them are loaded (takes around 10-15s for drive and ml).
+
+The program will output url to access the website, or just go to http://YOUR-GOOGLE-VISION-KIT-IP:4200
 
 
 #### Errors
 
-If you're getting errors, check if no other demos are running on the Google Vision Kit. Other programs block access to the camera.
+If you're getting errors, check if no other demos are running on the Google Vision Kit. Other programs block access to the camera. If car is not driving, check that it is on and you connected wires as they should be. If it's still not running, try restarting your Google Vision Kit, sometimes it doesn't detect pins.

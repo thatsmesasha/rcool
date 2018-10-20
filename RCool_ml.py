@@ -24,9 +24,7 @@ def main():
         input_shape=(1, 160, 160, 3),
         input_normalizer=(128.0, 128.0),
         compute_graph=utils.load_compute_graph('dumb.binaryproto'))
-    print('Model loaded')
     with inference.ImageInference(model) as inf:
-        print('Model ready')
         print('Waiting for input...')
         sys.stdout.flush()
         for _ in sys.stdin:
