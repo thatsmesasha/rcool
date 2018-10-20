@@ -31,8 +31,9 @@ def main():
         sys.stdout.flush()
         for _ in sys.stdin:
             now = time.time()
-            img = Image.open('{}/current.png'.format(os.getcwd()))
-            label, probability = process(inf.run(img))
+            img = Image.open('{}/current.jpg'.format(os.getcwd()))
+            result = inf.run(img)
+            label, probability = process(result)
             print('prediction: {} {} {}'.format(now, label, probability))
             sys.stdout.flush()
 
