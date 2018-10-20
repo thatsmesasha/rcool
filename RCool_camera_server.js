@@ -5,11 +5,11 @@ const fs = require('fs')
 
 const RASPI_CMD = '/opt/vc/bin/raspistill'
 const RASPI_ARGS = [
-  '-w', '96',
-  '-h', '96',
-  '-k', // receive new image when pressing enter
-  '-t', '999999999', // max time recording
-  '-o', '-', // output to stdout
+  '-w', '160',
+  '-h', '160',
+  '-tl', '0',
+  '-t', '999999999',
+  '-o', 'current.jpg',
 ]
 
 function createCameraServer() {
@@ -19,38 +19,42 @@ function createCameraServer() {
     console.error(`Camera Server: Error: ${err}`)
   })
 
-  raspi.stdout.on('data', (data) => {
-    fs.writeFile('current.png', base64.fromByteArray(data), 'base64', (err) => {
-      if (err) {
-        console.error(`Camera Server: Error: ${err}`)
-      }
-    })
-  })
-
-  setInterval(() => raspi.stdin.write('\n'), 50)
-
   const wss = new WebSocket.Server({ port: 4201 })
 
   wss.on('listening', () => {
     console.log('Camera Server: Waiting for connections...')
   })
 
+  const connectedWs = []
+
+  fs.watch(`${__dirname}`, function (event, filename) {
+    if (filename == 'current.jpg') {
+      fs.readFile(`${__dirname}/current.jpg`, function(err, buf) {
+        if (err) {
+          console.error(`Camera Server: Error: ${err}`)
+        } else {
+          connectedWs.map((ws) => {
+            try {
+              ws.send(buf.toString('base64'))
+            } catch (err) {
+              console.warning(`Camera Server: Warning: ${err}`)
+            }
+          })
+        }
+      })
+    }
+  })
+
+
   wss.on('connection', (ws, req) => {
     console.log(`Camera Server: Client ${req.connection.remoteAddress}: Connected`)
-
-    var currentData = (data) => {
-      try {
-        ws.send(base64.fromByteArray(data))
-      } catch (err) {
-
-      }
-    }
-
-    raspi.stdout.on('data', currentData)
+    connectedWs.push(ws)
 
     ws.on('close', () => {
       console.log(`Camera Server: Client ${req.connection.remoteAddress}: Disconnected`)
-      raspi.stdout.removeListener('data', currentData)
+      if (connectedWs.indexOf(ws) != -1) {
+        connectedWs.splice(connectedWs.indexOf(ws), 1)
+      }
     })
   })
 }
