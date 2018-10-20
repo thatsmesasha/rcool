@@ -4,9 +4,22 @@ RCool is a website for interaction with the RC car that is connected to Google V
 
 ## Installation
 
-You need to install node. The server was built on node v8.9.0 and npm v5.5.1
+Clone the repository on your Google Vision Kit. Follow instructions below inside this folder. You don't need to do anything on your local machine.
 
-Clone the repository. Run:
+Put your model MODEL.binaryproto (or use dumb.binaryproto) to /opt/aiy/models. If you have different name of the model than dumb.binaryproto, modify the name in RCool_ml.py and RCool_self_driving.py. If you kept name dumb.binaryproto, you don't need to change anything.
+
+#### Self-driving mode
+
+If you want to run just the self-driving mode without server, you don't need to install anything. Just run:
+```
+python3 RCool_self_driving.py
+```
+
+#### Web server
+
+For web server you need to install node. The server was built on node v8.9.0 and npm v5.5.1.
+
+Run:
 ```
 npm install
 ```
@@ -18,4 +31,7 @@ npm start
 
 It will output url to access the website, or just go to http://YOUR-GOOGLE-VISION-KIT-IP:4200
 
-If you're getting errors while starting the server, check if no other demos are running on the Google Vision Kit. Other programs may block access to the camera too.
+
+#### Errors
+
+If you're getting errors, check if no other demos are running on the Google Vision Kit. Other programs block access to the camera.
