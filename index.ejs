@@ -312,13 +312,16 @@
         var buttonStartStop = document.getElementById('start-stop-button')
         var folderInput = document.getElementById('folder')
         if (autoStarted != on) {
-          wsControl.send(JSON.stringify({ auto: on }))
+          if (on && folderInput.value) {
+            wsControl.send(JSON.stringify({ auto: on, folderName: folderInput.value}))
+          } else {
+            wsControl.send(JSON.stringify({ auto: on }))            
+          }
         }
         autoStarted = on
         if (on) {
           folderName = folderInput.value
           if (folderName) {
-            wsControl.send(JSON.stringify({ folderName }))
             recordImages = true
             changeStatus('Running self-driving mode with saving images')
           } else {

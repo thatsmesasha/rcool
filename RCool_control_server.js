@@ -116,15 +116,21 @@ function createControlServer(drive, ml) {
   wss.on('connection', (ws, req) => {
     console.log(`Control Server: Client ${req.connection.remoteAddress}: Connected`)
 
-    let folderName = null
+    let folderNameAuto = null
+
     const streamMlData = (data) => {
       data = String.fromCharCode.apply(null, data)
       if (!data.startsWith('prediction:')) return
 
       let [_, timestamp, direction, probability] = data.trim().split(' ')
+      drive.write(direction + '\n')
+
+      if (folderNameAuto) {
+        saveImage(ws, direction, folderNameAuto, direction != 'back')        
+      }
+
       try {
         ws.send(`Predicted direction '${direction}' with probability ${probability}`)
-        drive.write(direction + '\n')
       } catch (err) {
 
       }
@@ -151,8 +157,15 @@ function createControlServer(drive, ml) {
         createFolders(ws, data.folderName)
       } else if (typeof data.direction == 'string') {
         drive.write(data.direction + '\n')
-      } else if (typeof data.auto == 'boolean') {
+      }
+
+      if (typeof data.auto == 'boolean') {
         runningMl = data.auto
+        if (typeof data.folderName == 'string') {
+          folderNameAuto = data.folderName
+        } else {
+          folderNameAuto = null
+        }
       } else {
         console.error(`Control Server: Client ${req.connection.remoteAddress}: Error: no command corresponds to the received message`)
       }
