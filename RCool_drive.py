@@ -12,6 +12,8 @@ DRIVE_FORWARD_SPEED = 0.2
 DRIVE_BACK_SPEED = -0.3
 STEERING_STRAIGHT = -0.17
 
+last_back = False
+
 def drive_forward():
     speed.value = DRIVE_FORWARD_SPEED
     steering.value = STEERING_STRAIGHT
@@ -33,20 +35,29 @@ def stop():
     steering.value = STEERING_STRAIGHT
 
 def _drive(direction):
+    global last_back
+
     if direction == 'forward':
+        last_back = False
         print('driving forward')
         drive_forward()
     elif direction == 'right':
+        last_back = False
         print('driving right')
         drive_right()
     elif direction == 'left':
+        last_back = False
         print('driving left')
         drive_left()
     elif direction == 'back':
-        print('driving back')
-        drive_back()
-        Timer(0.05, stop).start()
-        Timer(0.1, drive_back).start()
+        if last_back:
+            print('driving back')
+            drive_back()
+        else:
+            print('stopping')
+            drive_back()
+            Timer(0.05, stop).start()
+        last_back = True
     elif direction == 'stop':
         print('stopping')
         stop()

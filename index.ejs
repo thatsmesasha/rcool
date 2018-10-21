@@ -315,7 +315,7 @@
           if (on && folderInput.value) {
             wsControl.send(JSON.stringify({ auto: on, folderName: folderInput.value}))
           } else {
-            wsControl.send(JSON.stringify({ auto: on }))            
+            wsControl.send(JSON.stringify({ auto: on }))
           }
         }
         autoStarted = on
@@ -358,6 +358,37 @@
       changeStatus('Cannot connect to control websocket. Make sure it is running and refresh the page.')
     }
   }
+
+  var keyDownTimer = null
+  var currentDirection = null
+  var keyDirection = {
+    '38': 'forward',
+    '40': 'back',
+    '37': 'left',
+    '39': 'right',
+  }
+
+  function onKeyDown(e) {
+    e = e || window.event
+
+    var direction = keyDirection[e.keyCode]
+    if (direction && !currentDirection) {
+      currentDirection = direction
+      pressKey(direction)
+      keyDownTimer = setInterval(() => pressKey(direction), 300)
+    }
+  }
+
+  function onKeyUp(e) {
+    currentDirection = null
+    if (keyDownTimer) {
+      clearInterval(keyDownTimer)
+      keyDownTimer = null
+    }
+  }
+
+  document.onkeydown = onKeyDown
+  document.onkeyup = onKeyUp
 
   var keyButtons = document.getElementsByClassName('key')
   for (var i = 0; i < keyButtons.length; i++) {
