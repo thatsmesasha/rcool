@@ -1,4 +1,4 @@
-rom picamera import PiCamera
+from picamera import PiCamera
 from PIL import Image
 import time
 from io import BytesIO
