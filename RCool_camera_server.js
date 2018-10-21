@@ -1,24 +1,8 @@
-const spawn = require('child_process').spawn
 const WebSocket = require('ws')
 const base64 = require('base64-js')
 const fs = require('fs')
 
-const RASPI_CMD = '/opt/vc/bin/raspistill'
-const RASPI_ARGS = [
-  '-w', '160',
-  '-h', '160',
-  '-tl', '0',
-  '-t', '999999999',
-  '-o', 'current.jpg',
-]
-
 function createCameraServer() {
-  const raspi = spawn(RASPI_CMD, RASPI_ARGS)
-  raspi.stdin.setEncoding('utf-8')
-  raspi.on('error', (err) => {
-    console.error(`Camera Server: Error: ${err}`)
-  })
-
   const wss = new WebSocket.Server({ port: 4201 })
 
   wss.on('listening', () => {
@@ -35,7 +19,9 @@ function createCameraServer() {
         } else {
           connectedWs.map((ws) => {
             try {
-              ws.send(buf.toString('base64'))
+              if (buf.toString('base64').length) {
+                ws.send(buf.toString('base64'))
+              }
             } catch (err) {
               console.warning(`Camera Server: Warning: ${err}`)
             }

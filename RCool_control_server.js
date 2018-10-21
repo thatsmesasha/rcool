@@ -6,8 +6,8 @@ const spawn = require('child_process').spawn
 const DRIVE_CMD = 'python3'
 const DRIVE_ARGS = [`${__dirname}/RCool_drive.py`]
 
-const ML_CMD = 'python3'
-const ML_ARGS = [`${__dirname}/RCool_ml.py`]
+const CAMERA_ML_CMD = 'python3'
+const CAMERA_ML_ARGS = [`${__dirname}/RCool_camera_with_ml.py`]
 
 function createFolders(ws, folderName) {
   const fullPath = `${__dirname}/${folderName}`
@@ -77,30 +77,24 @@ function createDriveClient() {
   return drive.stdin
 }
 
-// ML CLIENT CONNECTION
+// CAMERA & ML CLIENT CONNECTION
 let runningMl = false
 
-function createMlClient() {
-  const ml = spawn(ML_CMD, ML_ARGS)
-  ml.stdin.setEncoding('utf-8')
-  ml.stderr.on('data', (err) => {
-    console.error(`Ml Server: Error: ${err}`)
+function createCameraMlClient() {
+  const cameraWithMl = spawn(CAMERA_ML_CMD, CAMERA_ML_ARGS)
+  cameraWithMl.stdin.setEncoding('utf-8')
+  cameraWithMl.stderr.on('data', (err) => {
+    console.error(`Camera & Ml Server: Error: ${err}`)
   })
 
   var startMessage = (data) => {
-    console.log('Ml Server: Waiting for input...')
-    ml.stdout.removeListener('data', startMessage)
+    console.log('Camera & Ml Server: Waiting for input...')
+    cameraWithMl.stdout.removeListener('data', startMessage)
   }
 
-  ml.stdout.on('data', startMessage)
+  cameraWithMl.stdout.on('data', startMessage)
 
-  fs.watch(`${__dirname}`, function (event, filename) {
-    if (runningMl && filename == 'current.jpg') {
-      ml.stdin.write('\n')
-    }
-  })
-
-  return ml.stdout
+  return cameraWithMl
 }
 
 
@@ -136,7 +130,7 @@ function createControlServer(drive, ml) {
       }
     }
 
-    ml.on('data', streamMlData)
+    ml.stdout.on('data', streamMlData)
 
     ws.on('message', (data) => {
       console.log(`Control Server: Client ${req.connection.remoteAddress}: ${data}`)
@@ -155,6 +149,11 @@ function createControlServer(drive, ml) {
         drive.write(data.direction + '\n')
       } else if (typeof data.auto == 'boolean') {
         runningMl = data.auto
+        if (data.auto) {
+          ml.stdin.write('on\n')
+        } else {
+          ml.stdin.write('off\n')
+        }
         if (typeof data.folderName == 'string') {
           folderNameAuto = data.folderName
         } else {
@@ -172,14 +171,15 @@ function createControlServer(drive, ml) {
     ws.on('close', () => {
       console.log(`Control Server: Client ${req.connection.remoteAddress}: Disconnected`)
       runningMl = false
-      ml.removeListener('data', streamMlData)
+      ml.stdin.write('off\n')
+      ml.stdout.removeListener('data', streamMlData)
     })
   })
 }
 
 function run() {
   const drive = createDriveClient()
-  const ml = createMlClient()
+  const ml = createCameraMlClient()
   createControlServer(drive, ml)
 }
 

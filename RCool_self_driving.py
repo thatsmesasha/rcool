@@ -1,4 +1,4 @@
-from picamera import PiCamera
+rom picamera import PiCamera
 from PIL import Image
 import time
 from io import BytesIO
@@ -6,6 +6,8 @@ from aiy.vision import inference
 from aiy.vision.models import utils
 import sys, os
 import RCool_drive
+
+MODEL_NAME = 'dumb.binaryproto'
 
 labels = ['back', 'forward', 'left', 'right']
 
@@ -25,22 +27,17 @@ def start_self_driving():
         name='mobilenet_160',
         input_shape=(1, 160, 160, 3),
         input_normalizer=(128.0, 128.0),
-        compute_graph=utils.load_compute_graph('dumb.binaryproto'))
+        compute_graph=utils.load_compute_graph(MODEL_NAME))
     print('Model loaded')
-    with inference.ImageInference(model) as inf:
-        print('Model ready')
-        with PiCamera(resolution=(160, 160), framerate=40) as camera:
-            print('Connected to the Pi Camera')
-            while True:
-                start = time.time()
-                output = BytesIO()
-                camera.capture(output, 'jpeg')
-
-                image = Image.open(output)
-                direction, probability = process(inf.run(image))
+    with PiCamera(sensor_mode=4, resolution=(160, 160), framerate=30) as camera:
+        print('Connected to the Pi Camera')
+        with inference.CameraInference(model) as inf:
+            for result in inf.run():
+                direction, probability = process(result)
                 RCool_drive.drive(direction)
 
-                print('{:.2f} {:.2f}s Got prediction {} with probability {:.2f}'.format(time.time(), time.time() - start, direction, probability))
+                print('{:.2f} {} {:.2f}'.format(time.time(), direction, probability))
+
 
 if __name__ == '__main__':
     start_self_driving()
